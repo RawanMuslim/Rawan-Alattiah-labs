@@ -1,33 +1,30 @@
 package com.example.studyplanner
 
-
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun PlannerHomeRoute(
     onTaskClick: (String) -> Unit
 ) {
-    var uiState by remember {
-        mutableStateOf(
-            PlannerUiState(
-                greeting = "Hello!",
-                tasks = listOf(
-                    StudyTask(1, "Lab 5 report", "CSC 402"),
-                    StudyTask(2, "Review Lecture 4", "CSC 402"),
-                    StudyTask(3, "Complete assignment", "CSC 307"),
-                    StudyTask(4, "Study Android Navigation", "CSC 402"),
-                    StudyTask(5, "Prepare for exam", "CSC 307")
-                )
-            )
-        )
+    val viewModel: StudyPlannerViewModel = viewModel()
+    val uiState = viewModel.uiState
+
+    var draft by rememberSaveable {
+        mutableStateOf("")
     }
 
     PlannerHomeScreen(
         uiState = uiState,
+        draft = draft,
+        onDraftChange = { newText ->
+            draft = newText
+        },
+        onAddTask = {
+            viewModel.addTask(draft)
+            draft = ""
+        },
         onTaskClick = { id ->
             val task = uiState.tasks.find { it.id == id }
             if (task != null) {
@@ -35,15 +32,7 @@ fun PlannerHomeRoute(
             }
         },
         onDoneChange = { id, checked ->
-            uiState = uiState.copy(
-                tasks = uiState.tasks.map { task ->
-                    if (task.id == id) {
-                        task.copy(isDone = checked)
-                    } else {
-                        task
-                    }
-                }
-            )
+            viewModel.updateTaskDone(id, checked)
         }
     )
 }
