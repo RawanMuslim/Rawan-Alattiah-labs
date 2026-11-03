@@ -1,5 +1,6 @@
 package com.example.studyplanner
 
 data class PlannerUiState(
-    val tasks: List<String> = emptyList()
+    val greeting: String = "Hello!",
+    val tasks: List<StudyTask> = emptyList()
 )
